@@ -17,8 +17,8 @@ profileRouter.get("/profile/view", userAuth , async(req,res) => {
 
 profileRouter.patch("/profile/edit", userAuth, async(req,res) => {
     try{
-        if(!validateEditProfileData){
-            res.status(400).send("Update not allowed!");
+        if(!validateEditProfileData(req)){
+            return res.status(400).send("Update not allowed!");
         }
         const loggedInUser = req.user;
         Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
@@ -32,6 +32,27 @@ profileRouter.patch("/profile/edit", userAuth, async(req,res) => {
         res.status(400).send("Unable to edit : " + err.message);
     }
 });
+
+profileRouter.patch("/profile/become-owner", userAuth, async(req,res) => {
+    try{
+        const loggedInUser = req.user;
+
+        if(loggedInUser.role === "owner"){
+            res.status(400).send("You are already a owner!");
+        }
+
+        loggedInUser.role = "owner";
+        await loggedInUser.save();
+        res.json({
+            message: "You are now a turf owner!",
+            data: loggedInUser,
+        })
+
+
+    }catch(err){
+        res.status(400).send("Unable to edit role : " + err.message);
+    }
+})
 
 profileRouter.patch("/profile/updatePassword", userAuth, async (req, res) => {
   try {

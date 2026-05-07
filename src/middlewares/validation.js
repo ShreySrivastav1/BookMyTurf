@@ -6,4 +6,23 @@ const validateEditProfileData = (req) => {
     return isAllowedUpdates;
 }
 
-module.exports = {validateEditProfileData};
+
+const validateEditTurfData = (req) => {
+    const allowedUpdates = [
+        "name",
+        "description",
+        "sportsSupported",
+        "address",
+        "city",
+        "pricePerHour",
+        "openingTime",
+        "closingTime",
+        "amenities",
+        "photos",
+      ];
+
+      const isUpdateAllowed = Object.keys(req.body).every((field) =>allowedUpdates.includes(field));
+      return isUpdateAllowed;
+}
+
+module.exports = {validateEditProfileData , validateEditTurfData};
