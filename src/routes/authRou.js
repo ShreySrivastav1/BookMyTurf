@@ -1,12 +1,16 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const { validateSignUpData } = require("../utils/validation");
 const authRouter = express.Router();
 
 authRouter.post("/signUp", async(req,res) => {
     try{
+        validateSignUpData(req);
+
         const { firstName, lastName, emailId, password, phoneNumber} = req.body;
         const passwordHash = await bcrypt.hash(password,10);
+
         const user = new User({
             firstName,
             lastName,
@@ -15,11 +19,13 @@ authRouter.post("/signUp", async(req,res) => {
             phoneNumber
         });
         const savedUser = await user.save();
+
         const token = await savedUser.getJWT();
         res.cookie("token", token, {
             httpOnly: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
+
         res.json({
             message: "Signed up successfully!",
             data: savedUser

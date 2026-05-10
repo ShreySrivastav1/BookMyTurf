@@ -1,8 +1,8 @@
 const express = require("express");
 const userAuth = require("../middlewares/auth");
-const ownerAuthn= require("../middlewares/ownerAuth");
+const {ownerAuthn}= require("../middlewares/ownerAuth");
 const Turf = require("../models/turf");
-const { validateEditTurfData } = require("../middlewares/validation");
+const { validateEditTurfData } = require("../utils/validation");
 const ownerTurfRouter = express.Router();
 
 ownerTurfRouter.post("/turf/create", userAuth, ownerAuthn, async(req,res) => {
@@ -74,7 +74,7 @@ ownerTurfRouter.get("/owner/turfs", userAuth, ownerAuthn, async(req,res) => {
 ownerTurfRouter.patch("/turf/edit/:turfId", userAuth, ownerAuthn, async(req,res) => {
     try{
         const { turfId } = req.params;
-        if(!validateEditTurfData){
+        if(!validateEditTurfData(req)){
             return res.status(400).send("Update not allowed!");
         }
         // find turf
@@ -112,5 +112,32 @@ ownerTurfRouter.patch("/turf/edit/:turfId", userAuth, ownerAuthn, async(req,res)
     }
 
 });
+
+ownerTurfRouter.delete("/turf/delete/:turfId", userAuth, ownerAuthn, async(req,res) => {
+    try{
+        const { turfId } = req.params;
+        const turf = await Turf.findById(turfId);
+        if(!turf){
+            return res.status(404).send("No turf found");
+        }
+        if(turf.ownerId.toString() !== req.user._id.toString()){
+            return res.status(403).send("You can delete only your turf!")
+        }
+        turf.isActive = false;
+        const updatedTurf = await turf.save();
+        res.status(200).json({
+            message: "Turf activity updated",
+            data: updatedTurf
+        });
+
+    }catch(err){
+        res.status(400).json({
+            message: "Unable to update turf",
+            error: err.message,
+        });
+        
+    }
+    
+})
 
 module.exports = ownerTurfRouter;
