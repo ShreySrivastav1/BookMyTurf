@@ -38,7 +38,7 @@ profileRouter.patch("/profile/become-owner", userAuth, async(req,res) => {
         const loggedInUser = req.user;
 
         if(loggedInUser.role === "owner"){
-            res.status(400).send("You are already a owner!");
+            return res.status(400).send("You are already a owner!");
         }
 
         loggedInUser.role = "owner";

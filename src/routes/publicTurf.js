@@ -1,6 +1,7 @@
 const express = require("express");
 const userAuth = require("../middlewares/auth");
 const Turf = require("../models/turf");
+const mongoose = require("mongoose");
 const publicTurfRouter = express.Router();
 
 publicTurfRouter.get("/public/turfs", async (req, res) => {
@@ -32,6 +33,13 @@ publicTurfRouter.get("/public/turfs", async (req, res) => {
 publicTurfRouter.get("/public/turf/:turfId", async(req,res) => {
     try{
         const { turfId } = req.params;
+
+        if(mongoose.Types.Objectid.isValid(turfId)){
+          return res.status(400).json({
+            message: "Inavlid Turf id"
+          });
+        }
+
         const getTurf = await Turf.findOne({_id: turfId, isActive: true});
         if(!getTurf){
             return res.status(404).json({

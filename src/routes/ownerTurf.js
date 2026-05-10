@@ -74,6 +74,13 @@ ownerTurfRouter.get("/owner/turfs", userAuth, ownerAuthn, async(req,res) => {
 ownerTurfRouter.patch("/turf/edit/:turfId", userAuth, ownerAuthn, async(req,res) => {
     try{
         const { turfId } = req.params;
+        
+        if(mongoose.Types.Objectid.isValid(turfId)){
+            return res.status(400).json({
+                message: "Inavlid Turf id"
+            });
+        }
+
         if(!validateEditTurfData(req)){
             return res.status(400).send("Update not allowed!");
         }
@@ -116,6 +123,13 @@ ownerTurfRouter.patch("/turf/edit/:turfId", userAuth, ownerAuthn, async(req,res)
 ownerTurfRouter.delete("/turf/delete/:turfId", userAuth, ownerAuthn, async(req,res) => {
     try{
         const { turfId } = req.params;
+
+        if(mongoose.Types.Objectid.isValid(turfId)){
+            return res.status(400).json({
+                message: "Inavlid Turf id"
+            });
+        }
+        
         const turf = await Turf.findById(turfId);
         if(!turf){
             return res.status(404).send("No turf found");

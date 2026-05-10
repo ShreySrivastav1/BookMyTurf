@@ -62,7 +62,7 @@ const bookingSchema = new mongoose.Schema({
     paymentStatus: {
         type: String,
         enum: {
-            values: ["pending", "paid", "cancelled", "refunded"],
+            values: ["pending", "paid", "cancelled", "refund_pending", "refunded"],
             message: `{VALUE} is invalid status`
         },
         default: "pending",
@@ -73,7 +73,12 @@ const bookingSchema = new mongoose.Schema({
 
 bookingSchema.index(
   { turfId: 1, bookingDate: 1, startTime: 1, endTime: 1 },
-  { unique: true }
+  {
+    unique: true,
+    partialFilterExpression: {
+      bookingStatus: { $in: ["pending", "confirmed"] }
+    }
+  }
 );
 
 bookingSchema.pre("save", function(next) {

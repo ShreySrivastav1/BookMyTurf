@@ -181,7 +181,7 @@ bookingRouter.post("/booking", userAuth, async (req, res) => {
     }
 
     const durationInHours = endHour - startHour;
-    const totalAmount = durationInHours * turf.pricePerHour;
+    const totalPrice = durationInHours * turf.pricePerHour;
 
     const booking = new Booking({
       userId: req.user._id,
@@ -190,7 +190,7 @@ bookingRouter.post("/booking", userAuth, async (req, res) => {
       bookingDate: requestedDate,
       startTime,
       endTime,
-      totalAmount,
+      totalPrice,
       bookingStatus: "pending",
       paymentStatus: "pending",
     });
