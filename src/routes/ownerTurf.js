@@ -2,10 +2,10 @@ const express = require("express");
 const userAuth = require("../middlewares/auth");
 const {ownerAuthn}= require("../middlewares/ownerAuth");
 const Turf = require("../models/turf");
-const { validateEditTurfData } = require("../utils/validation");
+const { validateEditTurfData, validateTurfData } = require("../utils/validation");
 const ownerTurfRouter = express.Router();
 
-ownerTurfRouter.post("/turf/create", userAuth, ownerAuthn, async(req,res) => {
+ownerTurfRouter.post("/turf/create", userAuth, ownerAuthn, validateTurfData, async(req,res) => {
     try{
         const {
             name, 
@@ -129,7 +129,7 @@ ownerTurfRouter.delete("/turf/delete/:turfId", userAuth, ownerAuthn, async(req,r
                 message: "Inavlid Turf id"
             });
         }
-        
+
         const turf = await Turf.findById(turfId);
         if(!turf){
             return res.status(404).send("No turf found");
@@ -152,6 +152,6 @@ ownerTurfRouter.delete("/turf/delete/:turfId", userAuth, ownerAuthn, async(req,r
         
     }
     
-})
+});
 
 module.exports = ownerTurfRouter;

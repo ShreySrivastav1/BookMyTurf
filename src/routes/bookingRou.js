@@ -344,4 +344,98 @@ bookingRouter.get("/owner/bookings", userAuth, ownerAuthn, async(req,res) => {
     }
 });
 
+bookingRouter.patch("/booking/:bookingId/status/:status", userAuth, ownerAuthn, async (req, res) => {
+  try {
+    const { bookingId, status } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return res.status(400).json({
+        message: "Invalid booking id!",
+      });
+    }
+
+    const allowedStatus = ["confirmed", "completed", "cancelled"];
+
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status type: " + status,
+      });
+    }
+
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({
+        message: "Booking not found",
+      });
+    }
+
+    if (booking.ownerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "You can change status of your own turf booking only!",
+      });
+    }
+
+    if (booking.bookingStatus === "completed") {
+      return res.status(400).json({
+        message: "Completed booking status cannot be changed",
+      });
+    }
+
+    if (booking.bookingStatus === "cancelled") {
+      return res.status(400).json({
+        message: "Cancelled booking status cannot be changed",
+      });
+    }
+
+    const now = new Date();
+
+    const fullBookingEndDateTime = new Date(booking.bookingDate);
+    const [hours, minutes] = booking.endTime.split(":").map(Number);
+    fullBookingEndDateTime.setHours(hours, minutes, 0, 0);
+
+    if (status === "confirmed") {
+      if (booking.paymentStatus !== "paid") {
+        return res.status(400).json({
+          message: "Cannot confirm booking before payment is paid",
+        });
+      }
+
+      booking.bookingStatus = "confirmed";
+    }
+
+    if (status === "completed") {
+      if (booking.bookingStatus !== "confirmed") {
+        return res.status(400).json({
+          message: "Only confirmed booking can be marked as completed",
+        });
+      }
+
+      if (fullBookingEndDateTime > now) {
+        return res.status(400).json({
+          message: "Cannot mark booking completed before the game is over",
+        });
+      }
+
+      booking.bookingStatus = "completed";
+    }
+
+    if (status === "cancelled") {
+      booking.bookingStatus = "cancelled";
+    }
+
+    const updatedBooking = await booking.save();
+
+    res.status(200).json({
+      message: `Booking marked as ${status}`,
+      data: updatedBooking,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Unable to update booking status",
+      error: err.message,
+    });
+  }
+});
+
 module.exports = bookingRouter;

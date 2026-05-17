@@ -38,4 +38,63 @@ const validateEditTurfData = (req) => {
       return isUpdateAllowed;
 }
 
-module.exports = {validateEditProfileData , validateEditTurfData, validateSignUpData};
+const validateTurfData = (req, res, next) => {
+  const {
+    name,
+    sportsSupported,
+    address,
+    city,
+    pricePerHour,
+    openingTime,
+    closingTime,
+  } = req.body;
+
+  if (!name || !address || !city || !pricePerHour || !openingTime || !closingTime) {
+    return res.status(400).json({
+      message: "Please fill all required turf fields",
+    });
+  }
+
+  if (!Array.isArray(sportsSupported) || sportsSupported.length === 0) {
+    return res.status(400).json({
+      message: "At least one sport must be selected",
+    });
+  }
+
+  const allowedSports = ["football", "cricket", "badminton", "pickleball"];
+
+  const invalidSports = sportsSupported.filter(
+    (sport) => !allowedSports.includes(sport.toLowerCase())
+  );
+
+  if (invalidSports.length > 0) {
+    return res.status(400).json({
+      message: "Invalid sport type: " + invalidSports.join(", "),
+    });
+  }
+
+  if (pricePerHour <= 0) {
+    return res.status(400).json({
+      message: "Price per hour must be greater than 0",
+    });
+  }
+
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+  if (!timeRegex.test(openingTime) || !timeRegex.test(closingTime)) {
+    return res.status(400).json({
+      message: "Opening time and closing time must be in HH:mm format",
+    });
+  }
+
+  if (openingTime >= closingTime) {
+    return res.status(400).json({
+      message: "Opening time must be before closing time",
+    });
+  }
+
+  next();
+};
+
+
+module.exports = {validateEditProfileData , validateEditTurfData, validateSignUpData, validateTurfData};
