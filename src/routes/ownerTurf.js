@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const userAuth = require("../middlewares/auth");
 const {ownerAuthn}= require("../middlewares/ownerAuth");
 const Turf = require("../models/turf");
@@ -75,7 +76,7 @@ ownerTurfRouter.patch("/turf/edit/:turfId", userAuth, ownerAuthn, async(req,res)
     try{
         const { turfId } = req.params;
         
-        if(mongoose.Types.Objectid.isValid(turfId)){
+        if(!mongoose.Types.ObjectId.isValid(turfId)){
             return res.status(400).json({
                 message: "Inavlid Turf id"
             });

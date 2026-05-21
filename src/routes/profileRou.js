@@ -56,13 +56,13 @@ profileRouter.patch("/profile/become-owner", userAuth, async(req,res) => {
 
 profileRouter.patch("/profile/updatePassword", userAuth, async (req, res) => {
   try {
-    const { oldPassword, password } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
-    if (!oldPassword || !password) {
+    if (!oldPassword || !newPassword) {
       throw new Error("Old password and new password are required");
     }
 
-    if (!validator.isStrongPassword(password)) {
+    if (!validator.isStrongPassword(newPassword)) {
       throw new Error("Enter a strong password");
     }
 
@@ -74,18 +74,22 @@ profileRouter.patch("/profile/updatePassword", userAuth, async (req, res) => {
       throw new Error("Old password is incorrect!");
     }
 
-    const isSamePassword = await bcrypt.compare(password, user.password);
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
 
     if (isSamePassword) {
       throw new Error("New password cannot be same as old password");
     }
 
-    user.password = await bcrypt.hash(password, 10);
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    res.send(`${user.firstName}, your password has been successfully updated!`);
+    res.json({
+      message: `${user.firstName}, your password has been successfully updated!`,
+    });
   } catch (err) {
-    res.status(400).send("Unable to update: " + err.message);
+    res.status(400).json({
+      message: "Unable to update: " + err.message,
+    });
   }
 });
 

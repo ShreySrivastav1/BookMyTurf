@@ -34,13 +34,15 @@ publicTurfRouter.get("/public/turf/:turfId", async(req,res) => {
     try{
         const { turfId } = req.params;
 
-        if(mongoose.Types.Objectid.isValid(turfId)){
+        if(!mongoose.Types.ObjectId.isValid(turfId)){
           return res.status(400).json({
             message: "Inavlid Turf id"
           });
         }
 
-        const getTurf = await Turf.findOne({_id: turfId, isActive: true});
+        const getTurf = await Turf.findOne({_id: turfId, isActive: true})
+        .select("name description sportsSupported address city pricePerHour openingTime closingTime amenities photos");
+        
         if(!getTurf){
             return res.status(404).json({
                 message: "Unable to find turf"
