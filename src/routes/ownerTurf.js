@@ -50,7 +50,7 @@ ownerTurfRouter.post("/turf/create", userAuth, ownerAuthn, validateTurfData, asy
 
 ownerTurfRouter.get("/owner/turfs", userAuth, ownerAuthn, async(req,res) => {
     try{
-        const turfs = await Turf.find({ownerId: req.user._id});
+        const turfs = await Turf.find({ownerId: req.user._id, isActive: true,});
         if(turfs.length === 0){
             return res.status(200).json({
                 message: "You haven't registered any turf yet",
@@ -125,7 +125,7 @@ ownerTurfRouter.delete("/turf/delete/:turfId", userAuth, ownerAuthn, async(req,r
     try{
         const { turfId } = req.params;
 
-        if(mongoose.Types.Objectid.isValid(turfId)){
+        if(!mongoose.Types.ObjectId.isValid(turfId)){
             return res.status(400).json({
                 message: "Inavlid Turf id"
             });
