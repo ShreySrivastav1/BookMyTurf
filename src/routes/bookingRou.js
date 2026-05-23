@@ -103,6 +103,7 @@ bookingRouter.get("/turfs/:turfId/availability", async (req, res) => {
 });
 
 bookingRouter.post("/booking", userAuth, async (req, res) => {
+
   try {
     const { turfId, bookingDate, startTime, endTime } = req.body;
 

@@ -81,14 +81,6 @@ bookingSchema.index(
   }
 );
 
-bookingSchema.pre("save", function(next) {
-
-   if(this.startTime >= this.endTime){
-      return next(new Error("End time must be after start time"));
-   }
-
-   next();
-});
 
 const Booking = new mongoose.model("Booking", bookingSchema);
 
