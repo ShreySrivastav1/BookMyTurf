@@ -8,7 +8,8 @@ const profileRouter = require("./routes/profileRou");
 const ownerTurfRouter = require("./routes/ownerTurf");
 const publicTurfRouter = require("./routes/publicTurf");
 const bookingRouter = require("./routes/bookingRou");
-const cors = require("cors")
+const cors = require("cors");
+const paymentRouter = require("./routes/paymentRou");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -26,6 +27,7 @@ app.use("/",profileRouter);
 app.use("/",ownerTurfRouter);
 app.use("/",publicTurfRouter);
 app.use("/",bookingRouter);
+app.use("/",paymentRouter);
 
 connectDb().then(() => {
     console.log("Successfully connected to Database");
