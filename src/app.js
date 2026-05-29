@@ -31,8 +31,8 @@ app.use("/",paymentRouter);
 
 connectDb().then(() => {
     console.log("Successfully connected to Database");
-    app.listen(7777, () => {
-        console.log("Server is listening on port 7777");
+    app.listen(process.env.PORT, () => {
+        console.log("Server is listening on port");
 })
 }).catch((err) => {
     console.log("Unable to connect to DB");
